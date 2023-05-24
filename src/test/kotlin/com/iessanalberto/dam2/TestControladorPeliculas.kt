@@ -1,7 +1,6 @@
 package com.iessanalberto.dam2
 
-import com.iessanalberto.dam2.datos.RepositorioPeliculas
-import com.iessanalberto.dam2.datos.modelos.Pelicula
+import com.iessanalberto.dam2.datos.repositorios.RepositorioPeliculas
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
