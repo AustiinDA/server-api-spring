@@ -4,9 +4,10 @@ import com.iessanalberto.dam2.datos.dtos.RespuestaPaginada
 import com.iessanalberto.dam2.datos.modelos.Creditos
 import com.iessanalberto.dam2.datos.modelos.Pelicula
 import com.iessanalberto.dam2.datos.peticiones.PeticionPelicula
-import com.iessanalberto.dam2.datos.repositorios.RepositorioActores
+import com.iessanalberto.dam2.datos.repositorios.RepositorioCreditos
 import com.iessanalberto.dam2.datos.repositorios.RepositorioPeliculas
-import com.iessanalberto.dam2.datos.repositorios.RepositorioProduccion
+import com.iessanalberto.dam2.datos.servicios.ServicioCreditos
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
@@ -26,8 +27,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/peliculas")
 class ControladorPeliculas(
     private val repositorioPeliculas: RepositorioPeliculas,
-    private val repositorioActores: RepositorioActores,
-    private val repositorioProduccion: RepositorioProduccion
+    private val repositorioCreditos: RepositorioCreditos,
+    @Autowired private val servicioCreditos: ServicioCreditos
 ) {
 
     @GetMapping("/descubrir")
@@ -83,19 +84,30 @@ class ControladorPeliculas(
 
         return ResponseEntity.ok(peliculaActualizada)
     }
+
     @DeleteMapping("/{id}")
     fun borrarPelicula(@PathVariable("id") id: String): ResponseEntity<String> {
         repositorioPeliculas.deleteById(id)
         return ResponseEntity.ok("Película borrada exitosamente")
-        //return ResponseEntity.noContent().build()
     }
 
-//    @GetMapping("/{idPelicula}/creditos")
-//    fun obtenerCreditosPelicula(@PathVariable idPelicula: String): Creditos {
-//        // Lógica para obtener los créditos de la película con el ID proporcionado
-//        val elenco = servicioCreditos.obtenerElenco(idPelicula)
-//        val equipoProduccion = servicioCreditos.obtenerEquipoProduccion(idPelicula)
-//
-//        return Creditos(idPelicula, elenco, equipoProduccion)
-//    }
+    @PostMapping("/{idPelicula}/creditos")
+    fun crearCreditosPelicula(
+        @PathVariable idPelicula: String,
+        @RequestBody peticion: Creditos
+    ): ResponseEntity<Creditos> {
+        // Asociar el ID de la película a los créditos
+        peticion.idPelicula = idPelicula
+        // Guardar los créditos en el repositorio de créditos
+        servicioCreditos.guardarCreditos(peticion)
+        // Devolver la respuesta exitosa
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
+
+    @GetMapping("/{idPelicula}/creditos")
+    fun obtenerCreditosPelicula(@PathVariable idPelicula: String): ResponseEntity<Creditos> {
+        // Lógica para obtener los créditos de la película con el ID proporcionado
+        val creditos = repositorioCreditos.getCreditosByIdPelicula(idPelicula)
+        return ResponseEntity.ok(creditos)
+    }
 }
