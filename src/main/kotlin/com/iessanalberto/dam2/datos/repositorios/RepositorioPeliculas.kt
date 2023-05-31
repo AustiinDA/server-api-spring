@@ -7,6 +7,9 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.mongodb.repository.MongoRepository
 
 interface RepositorioPeliculas : MongoRepository<Pelicula, String> {
+
+    fun findByTituloContainingIgnoreCaseOrderByTitulo(titulo: String, pageable: Pageable): Page<Pelicula>
+
     fun findPeliculaById(id: String): Pelicula
 
     fun findAllByOrderByTitulo(pageable: Pageable): Page<Pelicula>
