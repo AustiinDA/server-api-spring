@@ -1,6 +1,6 @@
 package com.iessanalberto.dam2.datos
 
-import com.iessanalberto.dam2.datos.dtos.RespuestaPaginada
+import com.iessanalberto.dam2.datos.dtos.RespuestaPaginadaPeliculas
 import com.iessanalberto.dam2.datos.modelos.Creditos
 import com.iessanalberto.dam2.datos.modelos.Pelicula
 import com.iessanalberto.dam2.datos.peticiones.PeticionPelicula
@@ -33,33 +33,33 @@ class ControladorPeliculas(
 
     @GetMapping("/descubrir")
     fun devolverPeliculas(
-        @RequestParam("page", defaultValue = "0") page: Int,
-        @RequestParam("size", defaultValue = "20") size: Int,
+        @RequestParam("pagina", defaultValue = "0") pagina: Int,
+        @RequestParam("paginaSize", defaultValue = "5") paginaSize: Int,
         @RequestParam("titulo", required = false) titulo: String?
-    ): RespuestaPaginada {
+    ): RespuestaPaginadaPeliculas {
 
         if (titulo != null) {
-            return buscarPeliculasPorTitulo(titulo, page, size)
+            return buscarPeliculasPorTitulo(titulo, pagina, paginaSize)
         }
 
-        val paginaAjustada = if (page > 0) page - 1 else 0 // Ajusta la página a 0 si es menor o igual a 0
-        val pageable = PageRequest.of(paginaAjustada, size, Sort.by("titulo"))
-        val pageResult = repositorioPeliculas.findAllByOrderByTitulo(pageable)
+        val paginaAjustada = if (pagina > 0) pagina - 1 else 0 // Ajusta la página a 0 si es menor o igual a 0
+        val pageable = PageRequest.of(paginaAjustada, paginaSize, Sort.by("titulo"))
+        val resultadoPaginado = repositorioPeliculas.findAllByOrderByTitulo(pageable)
 
-        return RespuestaPaginada(
-            pageResult.number + 1, // Ajusta el número de página devuelto agregando 1
-            pageResult.content,
-            pageResult.totalPages,
-            pageResult.totalElements
+        return RespuestaPaginadaPeliculas(
+            resultadoPaginado.number + 1, // Ajusta el número de página devuelto agregando 1
+            resultadoPaginado.content,
+            resultadoPaginado.totalPages,
+            resultadoPaginado.totalElements
         )
     }
     //Método de búsqueda de las peliculas
-    private fun buscarPeliculasPorTitulo(titulo: String, page: Int, size: Int): RespuestaPaginada {
-        val paginaAjustada = if (page > 0) page - 1 else 0 // Ajusta la página a 0 si es menor o igual a 0
-        val pageable = PageRequest.of(paginaAjustada, size, Sort.by("titulo"))
+    private fun buscarPeliculasPorTitulo(titulo: String, pagina: Int, paginaSize: Int): RespuestaPaginadaPeliculas {
+        val paginaAjustada = if (pagina > 0) pagina - 1 else 0 // Ajusta la página a 0 si es menor o igual a 0
+        val pageable = PageRequest.of(paginaAjustada, paginaSize, Sort.by("titulo"))
         val pageResult = repositorioPeliculas.findByTituloContainingIgnoreCaseOrderByTitulo(titulo, pageable)
 
-        return RespuestaPaginada(
+        return RespuestaPaginadaPeliculas(
             pageResult.number + 1, // Ajusta el número de página devuelto agregando 1
             pageResult.content,
             pageResult.totalPages,
